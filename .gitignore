@@ -1,3 +1,8 @@
 data/*
 paper/*
 results/*
+R/*
+!R/sv_figure.R
+!R/pubTheme.R
+.DS_Store
+.Rhistory
