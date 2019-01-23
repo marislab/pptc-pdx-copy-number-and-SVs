@@ -1,3 +1,9 @@
+################################################
+# Author: Komal S Rathi
+# Function: Boxplots for Indels and Breakpoints
+# Date: 01/22/2019
+################################################
+
 setwd('~/Projects/Maris-lab/PPTC/')
 
 library(tidyr)
@@ -10,11 +16,6 @@ source('R/pubTheme.R')
 # clinical file 
 clin <- read.delim('data/2018-12-28-pdx-clinical-final-for-paper.txt', stringsAsFactors = F)
 clin <- clin[,c('Model','Histology.Detailed')]
-# old <- read.delim('data/2018-08-23-pdx-clinical-final-for-paper.txt', stringsAsFactors = F)
-# setdiff(old$Model, clin$Model)
-# setdiff(clin$Model, old$Model)
-# ICb-0614EPN was changed to ICb-10614EPN
-# IC-2664PNET was removed
 
 # colors
 cols <- read.delim('data/figures/2018-08-23-all-hist-colors', header = F, stringsAsFactors = F)
