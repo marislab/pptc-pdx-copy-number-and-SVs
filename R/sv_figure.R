@@ -1,8 +1,8 @@
-################################################
-# Author: Komal S Rathi
-# Function: Boxplots for Indels and Breakpoints
-# Date: 01/22/2019
-################################################
+##########################################################################
+# Author: Komal S Rathi & Jo Lynne Rokita
+# Function: Boxplots for Indels, Breakpoints, and High Breakpoint Density
+# Date: 02/14/2019
+##########################################################################
 
 setwd('~/Projects/Maris-lab/PPTC/')
 
@@ -10,22 +10,21 @@ library(tidyr)
 library(dplyr)
 library(reshape2)
 library(ggplot2)
+library(plyr)
 
-source('R/pubTheme.R')
+source('../PPTC_fusion_analysis/R/themes.R')
 
 # clinical file 
-clin <- read.delim('data/2018-12-28-pdx-clinical-final-for-paper.txt', stringsAsFactors = F)
-clin <- clin[,c('Model','Histology.Detailed')]
+clin.long <- read.delim('data/2019-02-09-pdx-clinical-final-for-paper.txt', stringsAsFactors = F)
+clin <- clin.long[,c('Model','Histology.Detailed')]
 
 # colors
-cols <- read.delim('data/figures/2018-08-23-all-hist-colors', header = F, stringsAsFactors = F)
+cols <- read.delim('data/figures/2019-02-09-all-hist-colors.txt', header = F, stringsAsFactors = F)
 cols <- cols[which(cols$V1 %in% clin$Histology.Detailed),]
 
 ############# Fig 1
-segdata <- read.delim('data/figures/2018-09-20-255pdx-final-pptc-SNPRANK-noXY.seg', stringsAsFactors = F)
-segdata <- segdata[which(segdata$Sample != "Rh-28"),]
+segdata <- read.delim('data/figures/2019-02-10-252pdx-final-pptc-SNPRANK-noXY.seg', stringsAsFactors = F)
 segdata <- segdata[which(!segdata[,"Chromosome"] %in% c("X","Y","M")),]
-
 cutoff <- 0.152		# which represents a 10% copy number change for a log2 ratio
 cutoff <- 0.2		# which represents a 10% copy number change for diploid regions
 
@@ -50,9 +49,18 @@ for(i in unique(segdata[,1])){
 breakpoints <- as.data.frame(do.call(rbind, cn_breaks))
 colnames(breakpoints) <- c("chr","breakpoints","sample")
 breakpoints <- merge(clin, breakpoints, by.y = 'sample', by.x = 'Model')
-breakpoints$breakpoints <- paste0(breakpoints$chr,':',breakpoints$breakpoints)
-breakpoints <- breakpoints %>% group_by(Model, Histology.Detailed) %>% summarise(n.breakpoints = n()) %>% as.data.frame()
-breakpoints <- breakpoints %>% group_by(Histology.Detailed) %>% mutate(median = median(n.breakpoints)) %>% as_data_frame()
+for.chrom <- breakpoints %>% group_by(Model, chr, Histology.Detailed) %>% dplyr::summarise(n.breakpoints = n()) %>% as.data.frame()
+setdiff(segdata$Sample, unique(breakpoints$Model)) # missing two models - likely no breakpoints?? ALL-59 and "NCH-WT-5
+
+####### breakpoints overall
+breakpoints <- breakpoints %>% group_by(Model, Histology.Detailed) %>% dplyr::summarise(n.breakpoints = n()) %>% as.data.frame()
+breakpoints <- breakpoints %>% group_by(Histology.Detailed) %>% dplyr::mutate(median = median(n.breakpoints)) %>% as.data.frame()
+to.include <- setdiff(segdata$Sample, breakpoints$Model) # add missing models
+df <- data.frame(Model = to.include, 
+                 Histology.Detailed = clin[which(clin$Model %in% to.include),'Histology.Detailed'], 
+                 n.breakpoints = c(rep(0,length(to.include))), 
+                 median = c(rep(0,length(to.include))))
+breakpoints <- rbind(breakpoints, df)
 breakpoints$Histology.Detailed <- reorder(breakpoints$Histology.Detailed, breakpoints$median)
 write.table(breakpoints, file = 'results/Breakpoints_rawdata.txt', quote = F, sep = "\t", row.names = F)
 
@@ -64,12 +72,12 @@ p <- ggplot(breakpoints, aes(x = Histology.Detailed, y = n.breakpoints, color = 
   geom_boxplot(outlier.shape = 21) + 
   geom_jitter(position=position_jitter(width=.1, height=0), shape = 21) +
   stat_boxplot(geom ='errorbar', width = 0.5) +
-  theme_bw() +
   guides(alpha = FALSE, fill = FALSE) + 
   theme_Publication() + xlab("Histology") + ylab('Number of Breakpoints') +
   theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1)) + 
   guides(color = F) +
   scale_color_manual(values = group.colors)
+p
 ggsave(filename = 'results/BreakpointsPlot.pdf', plot = p, device = 'pdf', height = 6, width = 10)
 
 breakpoint.medians <- unique(breakpoints[,c("Histology.Detailed","median")])
@@ -77,7 +85,7 @@ write.table(breakpoint.medians, file = 'results/Breakpoints_medians.txt', quote 
 
 ################### Fig 2
 # mutations (ins/dels only)
-mut <- read.delim('data/figures/2018-12-28-mutations-per-model.txt', stringsAsFactors = F)
+mut <- read.delim('data/figures/2019-02-13-mutations-per-model.txt', stringsAsFactors = F)
 mut$Histology.Detailed <- NULL
 mut <- unique(mut[,1:5])
 mut$value <- rowSums(mut[,2:5])
@@ -85,7 +93,7 @@ mut <- merge(mut, clin, by = "Model", all.y = T)
 mut <- unique(mut[,c("Model","Histology.Detailed","value")])
 mut[is.na(mut)] <- 0
 mut$value <- log2(mut$value + 1)
-mut <- mut %>% group_by(Histology.Detailed) %>% mutate(median = median(value)) %>% as.data.frame()
+mut <- mut %>% group_by(Histology.Detailed) %>% dplyr::mutate(median = median(value)) %>% as.data.frame()
 mut$Histology.Detailed <- reorder(mut$Histology.Detailed, mut$median)
 write.table(mut, file = 'results/Indels_rawdata.txt', quote = F, sep = "\t", row.names = F)
 
@@ -94,15 +102,92 @@ q <- ggplot(mut, aes(x = Histology.Detailed, y = value, color = Histology.Detail
   geom_boxplot(outlier.shape = 21, fill = 'white') + 
   geom_jitter(position=position_jitter(width=.1, height=0), shape = 21) +
   stat_boxplot(geom ='errorbar', width = 0.5) +
-  theme_bw() +
   guides(alpha = FALSE, fill = FALSE) + 
   theme_Publication() + xlab("Histology") + ylab('Number of Indels (log2)') +
   theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1)) + 
   guides(color = F) +
   scale_color_manual(values = group.colors)
-
-# merge
+q
 ggsave(filename = 'results/SVplot_log2.pdf', plot = q, device = 'pdf', height = 6, width = 13)
 
 sv.medians <- unique(mut[,c("Histology.Detailed","median")])
 write.table(sv.medians, file = 'results/SVplot_medians.txt', quote = F, sep = "\t", row.names = F)
+
+
+####CHROMOTHRIPSIS######
+
+# breakpoints by chromosome for breakpoint density analysis
+for.chrom$breakpoints <- paste0(for.chrom$chr,':',for.chrom$breakpoints)
+for.chrom$chr <- gsub(pattern = "chr", replacement = "", x = for.chrom$chr) 
+# relevel chromosomes
+for.chrom$chr <- factor(for.chrom$chr, levels = c("1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11",
+                                                  "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22"))
+
+# subset models with N >= 10 per one chromosome
+chromo <- subset(for.chrom, n.breakpoints >=10)
+chromo$chr.bp <- paste0("Chr", chromo$chr, ":", chromo$n.breakpoints)
+length(unique(chromo$Model))/length(unique(for.chrom$Model)) # percent of models with HDB
+head(chromo)
+
+# create table for supplement
+gathered <- chromo[,c("Model", "chr.bp", "Histology.Detailed")]
+
+unite.chrom <- gathered %>% 
+  group_by(Histology.Detailed, Model) %>% 
+  dplyr::summarise_all(funs(trimws(paste(., collapse = ', '))))
+names(unite.chrom) <- c("Histology", "Model", "Chromosomes:Breakpoints")
+# export for main table
+write.table(unite.chrom, 'results/high-density-breakpoints.txt', sep = "\t", quote = F, row.names = F, col.names = T)
+
+# collect n per each platform
+snp <- as.data.frame(table(clin.long$Histology.Detailed, clin.long$Have.snp.file))
+names(snp) <- c("Histology.Detailed", "snp", "snp.N")
+snp <- subset(snp, snp != "no")
+rna <- as.data.frame(table(clin.long$Histology.Detailed, clin.long$RNA.Part.of.PPTC))
+names(rna) <- c("Histology.Detailed", "rna", "rna.N")
+rna <- subset(rna, rna != "no")
+wes <- as.data.frame(table(clin.long$Histology.Detailed, clin.long$Have.maf))
+names(wes) <- c("Histology.Detailed", "wes", "wes.N")
+wes <- subset(wes, wes != "no")
+numbers <- merge(merge(snp, rna), wes)
+numbers$snp <- NULL
+numbers$rna <- NULL
+numbers$wes <- NULL
+# output numbers to file
+total <- as.data.frame(table(clin.long$Histology.Detailed))
+write.table(numbers, "results/numbers.txt", sep = "\t", quote = F, row.names = F, col.names = T)
+write.table(total, "results/total.txt", sep = "\t", quote = F, row.names = F, col.names = T)
+
+# percent of total models with high breakpoint density 
+length(unique(chromo$Model))/sum(numbers$snp.N)
+
+# unique per histology
+chromo.hist <- unique(chromo[c("Model", "Histology.Detailed")])
+bpdens <- as.data.frame(table(chromo.hist$Histology.Detailed))
+names(bpdens) <- c("Histology.Detailed", "n.chrom")
+n.chrom <- merge(numbers, bpdens, all.x = T)
+n.chrom$perc.chrom <- round(n.chrom$n.chrom/n.chrom$snp.N*100, 1)
+# make NA == 0
+n.chrom$perc.chrom <- ifelse(is.na(n.chrom$perc.chrom), 0, n.chrom$perc.chrom)
+n.chrom$perc.no <- 100-n.chrom$perc.chrom
+melt.chrom <- melt(n.chrom, id.vars = "Histology.Detailed", measure.vars = c("perc.chrom", "perc.no"))
+
+# reorder levels by perc.chrom
+levels(melt.chrom$Histology.Detailed)
+newlevels <- subset(melt.chrom, variable == "perc.chrom")
+melt.chrom$Histology.Detailed <- factor(melt.chrom$Histology.Detailed, levels=newlevels$Histology.Detailed[order(-newlevels$value)])
+
+################### Fig 3
+# chromothripsis figure
+q <- ggplot(melt.chrom, aes(y = value, x = Histology.Detailed, fill = variable, 
+                            label=paste0(round(value,0),"%"))) + 
+  geom_bar(stat="identity", position = position_fill(reverse = TRUE))+
+  scale_fill_manual(values = c("firebrick3", "gray89"), 
+                    name="Breakpoint\nDensity",
+                    labels=c("high", "low"))+
+  scale_y_continuous(labels = scales::percent_format(accuracy = 1))+
+  theme_Publication()+
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1))+
+  labs(x = "Histology", y = "Percent of Models")
+q
+ggsave(filename = 'results/HighBreakpointDensity.pdf', plot = q, device = 'pdf', height = 6, width = 10)
