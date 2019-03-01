@@ -4,5 +4,6 @@ results/*
 R/*
 !R/sv_figure.R
 !R/pubTheme.R
+!R/focal-CN.R
 .DS_Store
 .Rhistory
