@@ -61,10 +61,7 @@ seg2 <- seg.noxy[,c(2:ncol(seg.noxy), 1)]
 names(seg2) <- c("chr", "start", "end", "markers", "CN", "Model")
 seg2 = seg2 %>%
   mutate(chr=paste0('chr', chr))
-#head(seg2)
-#write.table(seg2, paste0("~/Box Sync/PPTC-genomics-collaboration/Data/snp-array-seg-files/", Sys.Date(), "-seg-bed.txt"),
- #           sep = "\t", quote = F, col.names = T, row.names = F)
-#head(gtf.short)
+
 #make genomic ranges object
 seg.gr = seg2 %>%
   mutate(chr=paste0('chr', chr)) %>%
@@ -85,29 +82,6 @@ colnames(overlaps) <- c("seg.int", "CN", "Model", "gene.int", "Hugo.Symbol")
 
 ov.df <- as.data.frame(overlaps)
 cn.short <- ov.df[,c("Hugo.Symbol", "Model", "CN")]
-#mycn <- subset(ov.df, Hugo.Symbol == "MYCN")
-#cdk <- subset(ov.df, Hugo.Symbol == "CDKN2A")
-#hist(mycn$CN, breaks = 50)
-#hist(cdk$CN, breaks = 50)
-#cn.short[,"ALL-116"]
-###use 0.538578182 as cutoff 2^2^0.5 for amps
-###use -1.739 as cutoff for dels 
-
-###amps - use MYCN as guide - this is lowest AMP sample that is amp by genetics and also encompasses brain mycn amps
-#focal.amps <- as.data.frame(subset(overlaps, CN > 0.538578182))
-#mycn.clin <- merge(mycn, clin[c("Model", "New.Histopathology", "Histology.Detailed")])
-#mycn.clin$mycn <- ifelse(mycn.clin$CN > 0.5, "MYCN Amp", "Non-MYCN Amp")
-#mycn.clin$test <- ifelse(mycn.clin$mycn == mycn.clin$New.Histopathology, "true", "false")
-#nbl <- subset(mycn.clin, Histology.Detailed == "Neuroblastoma")
-#table(nbl$test)
-
-#focal.dels <- as.data.frame(subset(overlaps, CN < (-1.739)))
-#write.table(focal.amps, paste0(pptc.folder, "Manuscript/scripts/focal-cn/", Sys.Date(), "-focal-amps.txt"), col.names = T, quote = F, row.names = F, sep = "\t")
-#write.table(focal.dels, paste0(pptc.folder, "Manuscript/scripts/focal-cn/", Sys.Date(), "-focal-dels.txt"), col.names = T, quote = F, row.names = F, sep = "\t")
-
-###create matrix of amps and dels
-#head(cn.short)
-
 
 ###reformat DF to wide format to create CN matrix
 data_wide <- acast(cn.short, Hugo.Symbol ~ Model, value.var = "CN", fun.aggregate = mean, drop = T)
@@ -350,16 +324,3 @@ pedc.cn[pedc.cn == "Hem_Deletion"] <- -1
 pedc.cn[pedc.cn == "Amplification"] <- 2
 ##Write new CN matrix for oncoprints
 write.table(as.data.frame(pedc.cn), paste0(pptc.folder, "Pedcbio-upload/", Sys.Date(), "-focal-cn-fpkm1.txt"), quote = F,col.names = T,row.names = T, sep = "\t")
-
-#cn1 <- read.delim(paste0(pptc.folder, "Pedcbio-upload/2019-02-13-focal-cn.txt"), header = T, sep = "\t", check.names =F)
-#cn2 <- read.delim(paste0(pptc.folder, "Pedcbio-upload/2019-02-27-focal-cn.txt"), header = T, sep = "\t", check.names =F)
-
-#cn1["SMARCB1",]
-#cn2["SMARCB1",]
-
-#z <- apply(x, 1, function(a) apply(y, 1, function(b) all(a==b)))
-
-#z <- apply(cn2, 1, function(a) apply(cn1, 1, function(b) all(a==b)))
-
-
-
