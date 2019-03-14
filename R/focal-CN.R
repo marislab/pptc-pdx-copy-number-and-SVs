@@ -302,7 +302,7 @@ for(i in which(colnames(gistic.cn) %in% as.list(ost.df$Model))){
 gistic.cn[gistic.cn == -1] <- ""
 
 ###merge hemi matrix with current CN matrix
-source(paste0(script.folder, "merge-CN-gistic-matrices-new.R"))
+source(paste0(repo, "merge-CN-gistic-matrices-new.R"))
 
 ###fix ALL-50 - should be hom del for both CDKN2A/B
 if("ALL-50" %in% colnames(gistic.cn)) {
