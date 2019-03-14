@@ -34,7 +34,7 @@ library(data.table)
 # Setting working directory
 mainDir <- "~/copy-number-and-SVs/"
 setwd(mainDir)
-repo <- "~/pptc-pdx-copy-number-and-SVs/"
+repo <- "~/pptc-pdx-copy-number-and-SVs/R/"
 dataDir <- "~/copy-number-and-SVs/data/"
 
 dir.create(file.path(mainDir,"focal-cn"))
