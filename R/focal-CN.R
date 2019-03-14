@@ -10,25 +10,35 @@ library(IRanges)
 library(reshape2)
 library(data.table)
 
+# Setting working directory
+mainDir <- "~/copy-number-and-SVs/"
+setwd(mainDir)
+repo <- "~/pptc-pdx-copy-number-and-SVs/"
+dataDir <- "~/copy-number-and-SVs/data/"
+
+dir.create(file.path(mainDir,"focal-cn"))
+dir.create(file.path(mainDir,"oncoprint-r-scripts"))
+
 #set directories for saving files, specify histology of interest
 ###create directories for saving files
-cnDir <- "~/Box Sync/PPTC-genomics-collaboration/Manuscript/scripts/focal-cn/"
-pptc.folder <- "~/Box Sync/PPTC-genomics-collaboration/"
-script.folder <- "~/Box Sync/PPTC-genomics-collaboration/Manuscript/scripts/oncoprint-r-scripts/"
+#cnDir <- "~/Box Sync/PPTC-genomics-collaboration/Manuscript/scripts/focal-cn/"
+#pptc.folder <- "~/Box Sync/PPTC-genomics-collaboration/"
+cnDir <- paste0(mainDir,"focal-cn/")
+script.folder <- paste0(mainDir,"oncoprint-r-scripts/")
 
 ###load RNA expression matrix
-load("~/Box Sync/PPTC-genomics-collaboration/Pedcbio-upload/2019-02-14-PPTC_FPKM_matrix_withModelID-244.rda", verbose = T) 
+load(paste0(dataDir,"2019-02-14-PPTC_FPKM_matrix_withModelID-244.rda"), verbose = T) 
 ###load gistic output
-gistic.out <- read.delim(paste0(pptc.folder, "Data/GISTIC-results/all-pdx/2018-08-09-gistic-results-256pdx-noXY-snpfast2-nomirna/all_thresholded.by_genes.txt"),as.is=TRUE,check.names=FALSE)
+gistic.out <- read.delim(paste0(repo,"all_thresholded.by_genes.txt"),as.is=TRUE,check.names=FALSE)
 colnames(gistic.out)[colnames(gistic.out) == "IC-2264PNET"] <- "IC-2664PNET"
 
-clin <- read.delim(paste0(pptc.folder, "Data/clinical/2019-02-09-pdx-clinical-final-for-paper.txt"), as.is = T, header = T)
+clin <- read.delim(paste0(dataDir, "pptc-pdx-clinical-web.txt"), as.is = T, header = T)
 
 ###read in hugo file with ENS ids
-hugo <- read.delim(paste0(pptc.folder,"/Data/Hugo_Symbols/2019-02-14-Hugo-Symbols-approved.txt"),
+hugo <- read.delim(paste0(dataDir,"2019-02-14-Hugo-Symbols-approved.txt"),
                    sep = "\t", header = T, as.is = T)
 ###read in gtf file, skip 5 rows of header
-gtf <- read.table(paste0(pptc.folder,"Data/Hugo_Symbols/Homo_sapiens.GRCh37.87.gtf"),
+gtf <- read.table(paste0(repo,"Homo_sapiens.GRCh37.87.gtf"),
                   sep = "\t", header = F, as.is = T)[-5,]
 
 
@@ -55,7 +65,7 @@ gtf.short <- subset(gtf.short, chr != "chrX" & chr != "chrY")
  #                                                             sep = "\t", quote = F, col.names = T, row.names = F)
 
 ###load seg file and use LRR for focal CN
-seg <- read.delim(paste0(pptc.folder, "Pedcbio-upload/2019-02-10-252pdx-final-pptc-SNPRANK-noXY.seg"), check.names = F) 
+seg <- read.delim(paste0(repo, "2019-02-10-252pdx-final-pptc-SNPRANK-noXY.seg"), check.names = F) 
 seg.noxy <- subset(seg, Chromosome != "Y" & Chromosome != "X")
 seg2 <- seg.noxy[,c(2:ncol(seg.noxy), 1)]
 names(seg2) <- c("chr", "start", "end", "markers", "CN", "Model")
@@ -87,7 +97,7 @@ cn.short <- ov.df[,c("Hugo.Symbol", "Model", "CN")]
 data_wide <- acast(cn.short, Hugo.Symbol ~ Model, value.var = "CN", fun.aggregate = mean, drop = T)
 #head(data_wide)
 #write CN matrix
-write.table(data_wide, paste0(pptc.folder, "Manuscript/scripts/focal-cn/", Sys.Date(), "-seg-CN-matrix.txt"), col.names = T, quote = F, row.names = T, sep = "\t")
+write.table(data_wide, paste0(cnDir, Sys.Date(), "-seg-CN-matrix.txt"), col.names = T, quote = F, row.names = T, sep = "\t")
 
 ###recode CN for focal amps, dels, and no change for pedcbio/oncoprints
 genecn2 <- apply(data_wide, 2, function(x) ifelse(x>=0.538578182,"Amplification", 
@@ -231,7 +241,7 @@ new.subset <- subset(new, select = c("gene_short_name.x","variable.x","value.x",
 models_no_expr <- setdiff(unique(new.subset$variable.x), colnames(rna.mat))
 
 # Writing dataframe to file
-write.table(models_no_expr, paste0(pptc.folder, "Manuscript/scripts/focal-cn/", Sys.Date(), "-models-no-RNA-expr.txt"),
+write.table(models_no_expr, paste0(cnDir, Sys.Date(), "-models-no-RNA-expr.txt"),
             sep = "\t", col.names = F, row.names = F, quote = F)
 
 
@@ -323,4 +333,4 @@ pedc.cn[pedc.cn == "Hom_Deletion"] <- -2
 pedc.cn[pedc.cn == "Hem_Deletion"] <- -1
 pedc.cn[pedc.cn == "Amplification"] <- 2
 ##Write new CN matrix for oncoprints
-write.table(as.data.frame(pedc.cn), paste0(pptc.folder, "Pedcbio-upload/", Sys.Date(), "-focal-cn-fpkm1.txt"), quote = F,col.names = T,row.names = T, sep = "\t")
+write.table(as.data.frame(pedc.cn), paste0(cnDir, Sys.Date(), "-focal-cn-fpkm1.txt"), quote = F,col.names = T,row.names = T, sep = "\t")
