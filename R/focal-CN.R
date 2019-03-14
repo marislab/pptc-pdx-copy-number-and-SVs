@@ -1,11 +1,32 @@
 #source("https://bioconductor.org/biocLite.R")
 #biocLite("Homo.sapiens")
 
-#install.packages("rmatio")
-require(rmatio)
-require(BSgenome.Hsapiens.UCSC.hg19)
-require(dplyr)
-require(tidyr)
+if (!require("rmatio")){
+  install.packages("rmatio", repos='http://cran.us.r-project.org', dependencies = TRUE)
+}
+if (!require("BSgenome.Hsapiens.UCSC.hg19")){
+  install.packages("BSgenome.Hsapiens.UCSC.hg19", repos='http://cran.us.r-project.org', dependencies = TRUE)
+}
+if (!require("dplyr")){
+  install.packages("dplyr", repos='http://cran.us.r-project.org', dependencies = TRUE)
+}
+if (!require("tidyr")){
+  install.packages("tidyr", repos='http://cran.us.r-project.org', dependencies = TRUE)
+}
+if (!require("IRanges")){
+  install.packages("IRanges", repos='http://cran.us.r-project.org', dependencies = TRUE)
+}
+if (!require("reshape2")){
+  install.packages("reshape2", repos='http://cran.us.r-project.org', dependencies = TRUE)
+}
+if (!require("data.table")){
+  install.packages("data.table", repos='http://cran.us.r-project.org', dependencies = TRUE)
+}
+
+library(rmatio)
+library(BSgenome.Hsapiens.UCSC.hg19)
+library(dplyr)
+library(tidyr)
 library(IRanges)
 library(reshape2)
 library(data.table)
@@ -17,14 +38,14 @@ repo <- "~/pptc-pdx-copy-number-and-SVs/"
 dataDir <- "~/copy-number-and-SVs/data/"
 
 dir.create(file.path(mainDir,"focal-cn"))
-dir.create(file.path(mainDir,"oncoprint-r-scripts"))
+#dir.create(file.path(mainDir,"oncoprint-r-scripts"))
 
 #set directories for saving files, specify histology of interest
 ###create directories for saving files
 #cnDir <- "~/Box Sync/PPTC-genomics-collaboration/Manuscript/scripts/focal-cn/"
 #pptc.folder <- "~/Box Sync/PPTC-genomics-collaboration/"
 cnDir <- paste0(mainDir,"focal-cn/")
-script.folder <- paste0(mainDir,"oncoprint-r-scripts/")
+#script.folder <- paste0(mainDir,"oncoprint-r-scripts/")
 
 ###load RNA expression matrix
 load(paste0(dataDir,"2019-02-14-PPTC_FPKM_matrix_withModelID-244.rda"), verbose = T) 
