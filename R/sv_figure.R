@@ -108,7 +108,7 @@ write.table(breakpoint.medians, file = paste0(result,'Breakpoints_medians.txt'),
 
 ################### Fig 2
 # mutations (ins/dels only)
-mut <- read.delim('data/figures/2019-02-13-mutations-per-model.txt', stringsAsFactors = F)
+mut <- read.delim(paste0(repo,'2019-02-13-mutations-per-model.txt'), stringsAsFactors = F)
 mut$Histology.Detailed <- NULL
 mut <- unique(mut[,1:5])
 mut$value <- rowSums(mut[,2:5])
