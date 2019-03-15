@@ -33,3 +33,6 @@ wget --output-document='2019-02-09-all-hist-colors.txt' https://ndownloader.figs
 
 # 6. mutations per model file
 wget --output-document='2019-02-13-mutations-per-model.txt' https://ndownloader.figshare.com/files/14612012
+
+# 7. GRCh37.87.gtf file
+wget --output-document='Homo_sapiens.GRCh37.87.gtf' https://ndownloader.figshare.com/files/14618315
