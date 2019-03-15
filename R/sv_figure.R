@@ -35,7 +35,7 @@ dataDir <- "~/copy-number-and-SVs/data/"
 dir.create(file.path(mainDir,"sv_figure_result"))
 result <- "~/copy-number-and-SVs/sv_figure_result/"
 
-source(paste0(repo,pubTheme.R))
+source(paste0(repo,"pubTheme.R"))
 
 # clinical file 
 clin.long <- read.delim(paste0(dataDir,'pptc-pdx-clinical-web.txt'), stringsAsFactors = F)
