@@ -179,7 +179,7 @@ numbers$wes <- NULL
 # output numbers to file
 total <- as.data.frame(table(clin.long$Histology.Detailed))
 write.table(numbers, paste0(result,"numbers.txt"), sep = "\t", quote = F, row.names = F, col.names = T)
-write.table(total, paste0(result,"results/total.txt"), sep = "\t", quote = F, row.names = F, col.names = T)
+write.table(total, paste0(result,"total.txt"), sep = "\t", quote = F, row.names = F, col.names = T)
 
 # percent of total models with high breakpoint density 
 length(unique(chromo$Model))/sum(numbers$snp.N)
