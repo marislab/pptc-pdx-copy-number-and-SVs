@@ -31,4 +31,5 @@ wget --output-document='2019-02-10-252pdx-final-pptc-SNPRANK-noXY.seg' https://n
 # 5. Hist colors file
 wget --output-document='2019-02-09-all-hist-colors.txt' https://ndownloader.figshare.com/files/14508539
 
-
+# 6. mutations per model file
+wget --output-document='2019-02-13-mutations-per-model.txt' https://ndownloader.figshare.com/files/14612012
