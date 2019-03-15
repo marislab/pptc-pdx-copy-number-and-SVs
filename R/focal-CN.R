@@ -59,7 +59,7 @@ clin <- read.delim(paste0(dataDir, "pptc-pdx-clinical-web.txt"), as.is = T, head
 hugo <- read.delim(paste0(dataDir,"2019-02-14-Hugo-Symbols-approved.txt"),
                    sep = "\t", header = T, as.is = T)
 ###read in gtf file, skip 5 rows of header
-gtf <- read.table(paste0(repo,"Homo_sapiens.GRCh37.87.gtf"),
+gtf <- read.table(paste0(dataDir,"Homo_sapiens.GRCh37.87.gtf"),
                   sep = "\t", header = F, as.is = T)[-5,]
 
 
