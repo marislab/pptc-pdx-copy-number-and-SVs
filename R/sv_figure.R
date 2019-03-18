@@ -12,7 +12,7 @@ library(reshape2)
 library(ggplot2)
 library(plyr)
 
-source('../PPTC_fusion_analysis/R/themes.R')
+source('R/pubTheme.R')
 
 # clinical file 
 clin.long <- read.delim('data/2019-02-09-pdx-clinical-final-for-paper.txt', stringsAsFactors = F)
