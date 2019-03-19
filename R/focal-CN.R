@@ -5,7 +5,8 @@ if (!require("rmatio")){
   install.packages("rmatio", repos='http://cran.us.r-project.org', dependencies = TRUE)
 }
 if (!require("BSgenome.Hsapiens.UCSC.hg19")){
-  install.packages("BSgenome.Hsapiens.UCSC.hg19", repos='http://cran.us.r-project.org', dependencies = TRUE)
+  install.packages("BiocManager",repos='http://cran.us.r-project.org', dependencies = TRUE)
+   BiocManager::install("BSgenome.Hsapiens.UCSC.hg19")
 }
 if (!require("dplyr")){
   install.packages("dplyr", repos='http://cran.us.r-project.org', dependencies = TRUE)
