@@ -25,7 +25,7 @@ Pipeline
          # How to run:
          # Download github repository in your home directory (~/)
          # Make sure to not clone the repository inside any other repository in your home directory
-         git clone https://github.com/kpatel427/pptc-pdx-copy-number-and-SVs.git
+         git clone https://github.com/marislab/pptc-pdx-copy-number-and-SVs.git
          
          # Run script to fetch data files
          ./data-fetch-pptc-pdx-copy-number-SV.sh
