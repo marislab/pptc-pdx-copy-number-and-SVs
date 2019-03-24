@@ -4,50 +4,26 @@
 # Date: 02/14/2019
 ##########################################################################
 
+setwd('~/Projects/Maris-lab/PPTC/')
 
-if (!require("tidyr")){
-  install.packages("tidyr", repos='http://cran.us.r-project.org', dependencies = TRUE)
-}
-if (!require("dplyr")){
-  install.packages("dplyr", repos='http://cran.us.r-project.org', dependencies = TRUE)
-}
-if (!require("reshape2")){
-  install.packages("reshape2", repos='http://cran.us.r-project.org', dependencies = TRUE)
-}
-if (!require("ggplot2")){
-  install.packages("ggplot2", repos='http://cran.us.r-project.org', dependencies = TRUE)
-}
-if (!require("plyr")){
-  install.packages("plyr", repos='http://cran.us.r-project.org', dependencies = TRUE)
-}
 library(tidyr)
 library(dplyr)
 library(reshape2)
 library(ggplot2)
 library(plyr)
 
-# Setting working directory
-mainDir <- "~/copy-number-and-SVs/"
-setwd(mainDir)
-repo <- "~/pptc-pdx-copy-number-and-SVs/R/"
-dataDir <- "~/copy-number-and-SVs/data/"
-
-dir.create(file.path(mainDir,"sv_figure_result"))
-result <- "~/copy-number-and-SVs/sv_figure_result/"
-
-source(paste0(repo,"pubTheme.R"))
-
+source('R/pubTheme.R')
 
 # clinical file 
-clin.long <- read.delim(paste0(dataDir,'pptc-pdx-clinical-web.txt'), stringsAsFactors = F)
+clin.long <- read.delim('data/2019-02-09-pdx-clinical-final-for-paper.txt', stringsAsFactors = F)
 clin <- clin.long[,c('Model','Histology.Detailed')]
 
 # colors
-cols <- read.delim(paste0(dataDir,'2019-02-09-all-hist-colors.txt'), header = F, stringsAsFactors = F)
+cols <- read.delim('data/figures/2019-02-09-all-hist-colors.txt', header = F, stringsAsFactors = F)
 cols <- cols[which(cols$V1 %in% clin$Histology.Detailed),]
 
 ############# Fig 1
-segdata <- read.delim(paste0(dataDir,'2019-02-10-252pdx-final-pptc-SNPRANK-noXY.seg'), stringsAsFactors = F)
+segdata <- read.delim('data/figures/2019-02-10-252pdx-final-pptc-SNPRANK-noXY.seg', stringsAsFactors = F)
 segdata <- segdata[which(!segdata[,"Chromosome"] %in% c("X","Y","M")),]
 cutoff <- 0.152		# which represents a 10% copy number change for a log2 ratio
 cutoff <- 0.2		# which represents a 10% copy number change for diploid regions
@@ -86,7 +62,7 @@ df <- data.frame(Model = to.include,
                  median = c(rep(0,length(to.include))))
 breakpoints <- rbind(breakpoints, df)
 breakpoints$Histology.Detailed <- reorder(breakpoints$Histology.Detailed, breakpoints$median)
-write.table(breakpoints, file = paste0(result,'Breakpoints_rawdata.txt'), quote = F, sep = "\t", row.names = F)
+write.table(breakpoints, file = 'results/Breakpoints_rawdata.txt', quote = F, sep = "\t", row.names = F)
 
 cols <- cols[match(levels(breakpoints$Histology.Detailed), cols$V1),] # reorder colors to match histology
 group.colors <- setNames(cols$V2, nm = cols$V1)
@@ -102,14 +78,14 @@ p <- ggplot(breakpoints, aes(x = Histology.Detailed, y = n.breakpoints, color = 
   guides(color = F) +
   scale_color_manual(values = group.colors)
 p
-ggsave(filename = paste0(result,'BreakpointsPlot.pdf'), plot = p, device = 'pdf', height = 6, width = 10)
+ggsave(filename = 'results/BreakpointsPlot.pdf', plot = p, device = 'pdf', height = 6, width = 10)
 
 breakpoint.medians <- unique(breakpoints[,c("Histology.Detailed","median")])
-write.table(breakpoint.medians, file = paste0(result,'Breakpoints_medians.txt'), quote = F, sep = "\t", row.names = F)
+write.table(breakpoint.medians, file = 'results/Breakpoints_medians.txt', quote = F, sep = "\t", row.names = F)
 
 ################### Fig 2
 # mutations (ins/dels only)
-mut <- read.delim(paste0(dataDir,'2019-02-13-mutations-per-model.txt'), stringsAsFactors = F)
+mut <- read.delim('data/figures/2019-02-13-mutations-per-model.txt', stringsAsFactors = F)
 mut$Histology.Detailed <- NULL
 mut <- unique(mut[,1:5])
 mut$value <- rowSums(mut[,2:5])
@@ -119,7 +95,7 @@ mut[is.na(mut)] <- 0
 mut$value <- log2(mut$value + 1)
 mut <- mut %>% group_by(Histology.Detailed) %>% dplyr::mutate(median = median(value)) %>% as.data.frame()
 mut$Histology.Detailed <- reorder(mut$Histology.Detailed, mut$median)
-write.table(mut, file = paste0(result,'Indels_rawdata.txt'), quote = F, sep = "\t", row.names = F)
+write.table(mut, file = 'results/Indels_rawdata.txt', quote = F, sep = "\t", row.names = F)
 
 # boxplot
 q <- ggplot(mut, aes(x = Histology.Detailed, y = value, color = Histology.Detailed, alpha = 0.5)) + 
@@ -132,10 +108,10 @@ q <- ggplot(mut, aes(x = Histology.Detailed, y = value, color = Histology.Detail
   guides(color = F) +
   scale_color_manual(values = group.colors)
 q
-ggsave(filename = paste0(result,'SVplot_log2.pdf'), plot = q, device = 'pdf', height = 6, width = 13)
+ggsave(filename = 'results/SVplot_log2.pdf', plot = q, device = 'pdf', height = 6, width = 13)
 
 sv.medians <- unique(mut[,c("Histology.Detailed","median")])
-write.table(sv.medians, file = paste0(result,'SVplot_medians.txt'), quote = F, sep = "\t", row.names = F)
+write.table(sv.medians, file = 'results/SVplot_medians.txt', quote = F, sep = "\t", row.names = F)
 
 
 ####CHROMOTHRIPSIS######
@@ -161,7 +137,7 @@ unite.chrom <- gathered %>%
   dplyr::summarise_all(funs(trimws(paste(., collapse = ', '))))
 names(unite.chrom) <- c("Histology", "Model", "Chromosomes:Breakpoints")
 # export for main table
-write.table(unite.chrom, paste0(result,'high-density-breakpoints.txt'), sep = "\t", quote = F, row.names = F, col.names = T)
+write.table(unite.chrom, 'results/high-density-breakpoints.txt', sep = "\t", quote = F, row.names = F, col.names = T)
 
 # collect n per each platform
 snp <- as.data.frame(table(clin.long$Histology.Detailed, clin.long$Have.snp.file))
@@ -179,8 +155,8 @@ numbers$rna <- NULL
 numbers$wes <- NULL
 # output numbers to file
 total <- as.data.frame(table(clin.long$Histology.Detailed))
-write.table(numbers, paste0(result,"numbers.txt"), sep = "\t", quote = F, row.names = F, col.names = T)
-write.table(total, paste0(result,"total.txt"), sep = "\t", quote = F, row.names = F, col.names = T)
+write.table(numbers, "results/numbers.txt", sep = "\t", quote = F, row.names = F, col.names = T)
+write.table(total, "results/total.txt", sep = "\t", quote = F, row.names = F, col.names = T)
 
 # percent of total models with high breakpoint density 
 length(unique(chromo$Model))/sum(numbers$snp.N)
@@ -214,4 +190,4 @@ q <- ggplot(melt.chrom, aes(y = value, x = Histology.Detailed, fill = variable,
   theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1))+
   labs(x = "Histology", y = "Percent of Models")
 q
-ggsave(filename = paste0(result,'HighBreakpointDensity.pdf'), plot = q, device = 'pdf', height = 6, width = 10)
+ggsave(filename = 'results/HighBreakpointDensity.pdf', plot = q, device = 'pdf', height = 6, width = 10)
