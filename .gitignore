@@ -6,5 +6,6 @@ R/*
 !R/pubTheme.R
 !R/focal-CN.R
 !R/get_data.R
+!R/ATRX_exon_coverage.R
 .DS_Store
 .Rhistory
