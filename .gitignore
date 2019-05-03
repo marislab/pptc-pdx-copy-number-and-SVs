@@ -7,5 +7,6 @@ R/*
 !R/focal-CN.R
 !R/get_data.R
 !R/ATRX_exon_coverage.R
+!R/atrx_tx_plot.R
 .DS_Store
 .Rhistory
