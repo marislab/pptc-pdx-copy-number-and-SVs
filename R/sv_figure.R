@@ -15,7 +15,7 @@ library(plyr)
 source('R/pubTheme.R')
 
 # clinical file 
-clin.long <- read.delim('data/2019-02-09-pdx-clinical-final-for-paper.txt', stringsAsFactors = F)
+clin.long <- read.delim('data/2019-04-09-pdx-clinical-final-for-paper.txt', stringsAsFactors = F)
 clin <- clin.long[,c('Model','Histology.Detailed')]
 
 # colors
@@ -56,10 +56,11 @@ setdiff(segdata$Sample, unique(breakpoints$Model)) # missing two models - likely
 breakpoints <- breakpoints %>% group_by(Model, Histology.Detailed) %>% dplyr::summarise(n.breakpoints = n()) %>% as.data.frame()
 breakpoints <- breakpoints %>% group_by(Histology.Detailed) %>% dplyr::mutate(median = median(n.breakpoints)) %>% as.data.frame()
 to.include <- setdiff(segdata$Sample, breakpoints$Model) # add missing models
+add.medians.to.missing <- unique(breakpoints[which(breakpoints$Histology.Detailed %in% clin[which(clin$Model %in% to.include),'Histology.Detailed']),c('Histology.Detailed','median')])
 df <- data.frame(Model = to.include, 
                  Histology.Detailed = clin[which(clin$Model %in% to.include),'Histology.Detailed'], 
-                 n.breakpoints = c(rep(0,length(to.include))), 
-                 median = c(rep(0,length(to.include))))
+                 n.breakpoints = c(rep(0,length(to.include))))
+df <- merge(df, add.medians.to.missing, by = 'Histology.Detailed')
 breakpoints <- rbind(breakpoints, df)
 breakpoints$Histology.Detailed <- reorder(breakpoints$Histology.Detailed, breakpoints$median)
 write.table(breakpoints, file = 'results/Breakpoints_rawdata.txt', quote = F, sep = "\t", row.names = F)
