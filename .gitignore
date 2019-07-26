@@ -3,6 +3,7 @@ paper/*
 results/*
 R/*
 !R/sv_figure.R
+!R/pedcbio_format.R
 !R/pubTheme.R
 !R/focal-CN.R
 !R/get_data.R
