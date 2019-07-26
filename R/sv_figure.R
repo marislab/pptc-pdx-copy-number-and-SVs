@@ -15,7 +15,7 @@ library(plyr)
 source('R/pubTheme.R')
 
 # clinical file 
-clin.long <- read.delim('data/2019-04-09-pdx-clinical-final-for-paper.txt', stringsAsFactors = F)
+clin.long <- read.delim('data/2019-07-25-pdx-clinical-final-for-paper.txt', stringsAsFactors = F)
 clin <- clin.long[,c('Model','Histology.Detailed')]
 
 # colors
