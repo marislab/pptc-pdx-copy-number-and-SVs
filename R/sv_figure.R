@@ -15,7 +15,7 @@ library(plyr)
 source('R/pubTheme.R')
 
 # clinical file 
-clin.long <- read.delim('data/2019-07-25-pdx-clinical-final-for-paper.txt', stringsAsFactors = F)
+clin.long <- read.delim('~/Box Sync/PPTC-genomics-collaboration/Data/clinical/2019-07-25-clin.txt', stringsAsFactors = F)
 clin <- clin.long[,c('Model','Histology.Detailed')]
 
 # colors
@@ -50,7 +50,6 @@ breakpoints <- as.data.frame(do.call(rbind, cn_breaks))
 colnames(breakpoints) <- c("chr","breakpoints","sample")
 breakpoints <- merge(clin, breakpoints, by.y = 'sample', by.x = 'Model')
 for.chrom <- breakpoints %>% group_by(Model, chr, Histology.Detailed) %>% dplyr::summarise(n.breakpoints = n()) %>% as.data.frame()
-setdiff(segdata$Sample, unique(breakpoints$Model)) # missing two models - likely no breakpoints?? ALL-59 and "NCH-WT-5
 
 ####### breakpoints overall
 breakpoints <- breakpoints %>% group_by(Model, Histology.Detailed) %>% dplyr::summarise(n.breakpoints = n()) %>% as.data.frame()
@@ -138,7 +137,7 @@ unite.chrom <- gathered %>%
   dplyr::summarise_all(funs(trimws(paste(., collapse = ', '))))
 names(unite.chrom) <- c("Histology", "Model", "Chromosomes:Breakpoints")
 # export for main table
-write.table(unite.chrom, 'results/high-density-breakpoints.txt', sep = "\t", quote = F, row.names = F, col.names = T)
+write.table(unite.chrom, '~/Box Sync/PPTC-genomics-collaboration/Manuscript/figures/SV-figure/high-density-breakpoints.txt', sep = "\t", quote = F, row.names = F, col.names = T)
 
 # collect n per each platform
 snp <- as.data.frame(table(clin.long$Histology.Detailed, clin.long$Have.snp.file))
@@ -156,8 +155,8 @@ numbers$rna <- NULL
 numbers$wes <- NULL
 # output numbers to file
 total <- as.data.frame(table(clin.long$Histology.Detailed))
-write.table(numbers, "results/numbers.txt", sep = "\t", quote = F, row.names = F, col.names = T)
-write.table(total, "results/total.txt", sep = "\t", quote = F, row.names = F, col.names = T)
+write.table(numbers, "~/Box Sync/PPTC-genomics-collaboration/Manuscript/tables-v3/numbers.txt", sep = "\t", quote = F, row.names = F, col.names = T)
+write.table(total, "~/Box Sync/PPTC-genomics-collaboration/Manuscript/tables-v3/total.txt", sep = "\t", quote = F, row.names = F, col.names = T)
 
 # percent of total models with high breakpoint density 
 length(unique(chromo$Model))/sum(numbers$snp.N)
@@ -191,4 +190,4 @@ q <- ggplot(melt.chrom, aes(y = value, x = Histology.Detailed, fill = variable,
   theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1))+
   labs(x = "Histology", y = "Percent of Models")
 q
-ggsave(filename = 'results/HighBreakpointDensity.pdf', plot = q, device = 'pdf', height = 6, width = 10)
+ggsave(filename = '~/Box Sync/PPTC-genomics-collaboration/Manuscript/figures/SV-figure/HighBreakpointDensity.pdf', plot = q, device = 'pdf', height = 6, width = 10)
