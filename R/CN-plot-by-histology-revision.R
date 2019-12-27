@@ -29,7 +29,7 @@ chr_genome_pos<-unlist(chr_genome_pos)
 names(chr_genome_pos) <-names(chrlengths)
 
 # read gene annotation matrix from matlab (the same used to run GISTIC)
-genemat <- read.mat(paste0(mainDir, "data/hg19.mat"))
+genemat <- read.mat(paste0(dataDir, "hg19.mat"))
 genepos <- unlist(genemat$rg$start)
 genechr <- unlist(genemat$rg$chr)
 names(genepos) <-names(genechr) <-unlist(genemat$rg$symb)
