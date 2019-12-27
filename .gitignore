@@ -1,5 +1,3 @@
-bash/*
-!bash/run-CN-plots.sh
 data/*
 !data/all_data_by_genes.txt
 !data/hg19.mat
