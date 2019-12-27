@@ -1,8 +1,5 @@
-###### create cohesive oncoprints to regenerate Figures 2 and 3########
-#
-#     Authors: Jo Lynne Rokita, Gonzalo Lopez     
-#     Updated 2019-12-27
-################################################################
+#!/usr/bin/bash
 
-chmod 666 ~/pptc-pdx-copy-number-and-SVs/data/hg19.mat
+cd ~/pptc-pdx-copy-number-and-SVs/data/
+wget https://ndownloader.figshare.com/files/20469471
 Rscript ~/pptc-pdx-copy-number-and-SVs/R/CN-plot-by-histology-revision.R
