@@ -29,18 +29,18 @@ chr_genome_pos<-unlist(chr_genome_pos)
 names(chr_genome_pos) <-names(chrlengths)
 
 # read gene annotation matrix from matlab (the same used to run GISTIC)
-genemat <- read.mat(paste0(home, "data/hg19.mat"))
+genemat <- read.mat(paste0(mainDir, "data/hg19.mat"))
 genepos <- unlist(genemat$rg$start)
 genechr <- unlist(genemat$rg$chr)
 names(genepos) <-names(genechr) <-unlist(genemat$rg$symb)
 
-clin <- read.delim(paste0(home, "data/pptc-pdx-clinical-web.txt"), as.is = T, header = T)
+clin <- read.delim(paste0(mainDir, "data/pptc-pdx-clinical-web.txt"), as.is = T, header = T)
 clin <- clin[,c("Model", "Histology.Detailed")]
 clin$Histology <- ifelse(clin$Histology.Detailed == "Ph+-ALL" | clin$Histology.Detailed == "Ph-likeALL", "Ph+/-like-ALL", clin$Histology.Detailed)
 hists <- as.list(unique(clin$Histology))
 
 # load gene level copy number matrix from GISTIC - located in data folder
-df <- read.delim(paste0(home, "data/all_data_by_genes.txt"),as.is=TRUE,check.names=FALSE)
+df <- read.delim(paste0(mainDir, "data/all_data_by_genes.txt"),as.is=TRUE,check.names=FALSE)
 names(df)
 
 #convert to matrix
@@ -64,8 +64,8 @@ hist.10.solid <- subset(hist.10, Var1 != "T-ALL" & Var1 != "MLL-ALL" & Var1 != "
 df <- hist.10.solid
 
 ###plot
-#pdf(paste(home, "/results/", Sys.Date(), "-leukemkia-CN-plots.pdf", sep = ""), width = 6, height = 8)
-pdf(paste(home, "/results/", Sys.Date(), "-solid-CN-plots.pdf", sep = ""), width = 6, height = 8)
+#pdf(paste(mainDir, "/results/", Sys.Date(), "-leukemkia-CN-plots.pdf", sep = ""), width = 6, height = 8)
+pdf(paste(mainDir, "/results/", Sys.Date(), "-solid-CN-plots.pdf", sep = ""), width = 6, height = 8)
 par(mfrow=c(5,1))
 for (each in df$Var1){
   sub.clin <- subset(clin, Histology == each) 
