@@ -1,4 +1,7 @@
 data/*
+!data/all_data_by_genes.txt
+!data/hg19.mat
+!data/pptc-pdx-clinical-web.txt
 paper/*
 results/*
 R/*
@@ -9,5 +12,7 @@ R/*
 !R/get_data.R
 !R/ATRX_exon_coverage.R
 !R/atrx_tx_plot.R
+!R/install-packages.R
+!R/CN-plot-by-histology-revision.R
 .DS_Store
 .Rhistory
